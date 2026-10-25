@@ -3,6 +3,37 @@ import '@testing-library/jest-dom'
 
 describe("QueryProcessor", () => {
     test.each([
+        ["What is 25 minus 41?", "-16"],
+        ["What is 13 multiplied by 7?", "91"],
+        ["What is 8 times 9?", "72"],
+        ["What is 81 divided by 9?", "9"],
+        ["What is 2 to the power of 10?", "1024"],
+        ["What is 3 raised to the power of 4?", "81"],
+        ["What is 2 plus 3 multiplied by 4?", "14"],
+        ["id: What is (2 plus 3) multiplied by 4?", "20"],
+        ["What is 2 multiplied by 3 plus 4 multiplied by 5?", "26"],
+        ["What is 9 minus -2?", "11"],
+        ["What is 3 plus 4", "7"],
+        ["Which of the following numbers is the smallest: 5, -9, 2?", "-9"],
+        ["Which of the following numbers are primes: 1, 2, 3, 4, 9, 17?", "2, 3, 17"],
+        ["Which of the following numbers are primes: -3, 0, 1, 49?", ""],
+        ["Which of the following numbers are square numbers: -4, 0, 1, 16, 25, 26?", "0, 1, 16, 25"],
+        ["Which of the following numbers are cubes: -8, 1, 8, 27, 64, 65?", "-8, 1, 8, 27, 64"],
+        ["Which of the following numbers are both squares and cubes: 1, 4, 8, 64, 729, 4096?", "1, 64, 729, 4096"],
+    ])('answers math question "%s"', (query, expected) => {
+        expect(QueryProcessor(query)).toBe(expected);
+    });
+
+    test.each([
+        "What is 8 divided by 0?",
+        "What is 2 plus?",
+        "What is 2 plus 3 garbage?",
+        "What is process.exit()?",
+    ])('leaves invalid arithmetic unanswered: "%s"', (query) => {
+        expect(QueryProcessor(query)).toBe("");
+    });
+
+    test.each([
         ["Which of the following numbers is the largest: 43, 78, 90?", "90"],
         ["Which of the following numbers is the largest: 48, 99, 81?", "99"],
         ["id: Which of the following numbers is the largest: -5, -2, -9?", "-2"],
