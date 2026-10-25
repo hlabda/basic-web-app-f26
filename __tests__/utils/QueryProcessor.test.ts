@@ -3,6 +3,17 @@ import '@testing-library/jest-dom'
 
 describe("QueryProcessor", () => {
     test.each([
+        ["What is 2 to the power of 60?", "1152921504606846976"],
+        ["What is 2 to the power of 100?", "1267650600228229401496703205376"],
+        ["What is 10 to the power of 22?", "10000000000000000000000"],
+        ["What is 3 multiplied  by 4?", "12"],
+        ["Which of the following numbers is the largest : 1, 9, 5?", "9"],
+        ["What is 9007199254740993 plus 2 multiplied by 3?", "9007199254740999"],
+    ])('preserves exact integers and flexible spacing in "%s"', (query, expected) => {
+        expect(QueryProcessor(query)).toBe(expected);
+    });
+
+    test.each([
         ["What is 25 minus 41?", "-16"],
         ["What is 13 multiplied by 7?", "91"],
         ["What is 8 times 9?", "72"],

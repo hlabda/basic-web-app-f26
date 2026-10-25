@@ -16,9 +16,47 @@ function isCube(value: number): boolean {
   return root * root * root === value;
 }
 
+type Numeric = bigint | number;
+
+function combine(left: Numeric, right: Numeric, operator: string): Numeric {
+  if (typeof left === "bigint" && typeof right === "bigint") {
+    if (operator === "+") return left + right;
+    if (operator === "-") return left - right;
+    if (operator === "*") return left * right;
+    if (operator === "/") {
+      if (right === BigInt(0)) return NaN;
+      if (left % right === BigInt(0)) return left / right;
+    }
+  }
+  const a = Number(left);
+  const b = Number(right);
+  if (operator === "+") return a + b;
+  if (operator === "-") return a - b;
+  if (operator === "*") return a * b;
+  if (operator === "/") return a / b;
+  return NaN;
+}
+
+function raise(base: Numeric, exponent: Numeric): Numeric {
+  if (!Number.isFinite(Number(exponent)) || Math.abs(Number(exponent)) > 10000) return NaN;
+  if (typeof base === "bigint" && typeof exponent === "bigint" && exponent >= BigInt(0)) {
+    let result = BigInt(1);
+    let factor = base;
+    let remaining = exponent;
+    while (remaining > BigInt(0)) {
+      if (remaining % BigInt(2) === BigInt(1)) result *= factor;
+      remaining /= BigInt(2);
+      if (remaining > BigInt(0)) factor *= factor;
+    }
+    return result;
+  }
+  return Math.pow(Number(base), Number(exponent));
+}
+
 // Parse only numbers and arithmetic operators; never execute query text as code.
-function calculate(expression: string): number | undefined {
+function calculate(expression: string): Numeric | undefined {
   const normalized = expression.toLowerCase()
+    .replace(/\s+/g, " ").trim()
     .replace(/raised to the power of|to the power of|to the power/g, "^")
     .replace(/multiplied by|times/g, "*")
     .replace(/divided by/g, "/")
@@ -29,7 +67,7 @@ function calculate(expression: string): number | undefined {
   if (!tokens || tokens.join("") !== normalized) return undefined;
   let position = 0;
 
-  function atom(): number {
+  function atom(): Numeric {
     const token = tokens![position++];
     if (token === "+") return atom();
     if (token === "-") return -atom();
@@ -38,47 +76,48 @@ function calculate(expression: string): number | undefined {
       if (tokens![position++] !== ")") return NaN;
       return value;
     }
-    return token && /^\d/.test(token) ? Number(token) : NaN;
+    if (!token || !/^\d/.test(token)) return NaN;
+    return token.includes(".") ? Number(token) : BigInt(token);
   }
 
-  function power(): number {
+  function power(): Numeric {
     const left = atom();
     if (tokens![position] === "^") {
       position++;
-      return Math.pow(left, power());
+      return raise(left, power());
     }
     return left;
   }
 
-  function product(): number {
+  function product(): Numeric {
     let value = power();
     while (tokens![position] === "*" || tokens![position] === "/") {
       const operator = tokens![position++];
       const right = power();
-      value = operator === "*" ? value * right : value / right;
+      value = combine(value, right, operator);
     }
     return value;
   }
 
-  function sum(): number {
+  function sum(): Numeric {
     let value = product();
     while (tokens![position] === "+" || tokens![position] === "-") {
       const operator = tokens![position++];
       const right = product();
-      value = operator === "+" ? value + right : value - right;
+      value = combine(value, right, operator);
     }
     return value;
   }
 
   const result = sum();
-  return position === tokens.length && Number.isFinite(result) ? result : undefined;
+  return position === tokens.length && (typeof result === "bigint" || Number.isFinite(result)) ? result : undefined;
 }
 
 export default function QueryProcessor(query: string): string {
   const list = query.match(/which of the following numbers (?:is|are) (.+?):\s*(-?\d+(?:\s*,\s*-?\d+)*)\s*\??\s*$/i);
   if (list) {
     const numbers = list[2].split(",").map(Number);
-    const kind = list[1].toLowerCase();
+    const kind = list[1].toLowerCase().trim();
     if (kind === "the largest") return String(Math.max(...numbers));
     if (kind === "the smallest") return String(Math.min(...numbers));
     if (/\bprimes?\b/.test(kind)) return numbers.filter(isPrime).join(", ");
