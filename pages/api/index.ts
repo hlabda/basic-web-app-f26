@@ -10,7 +10,8 @@ export default function handler(
 ) {
   console.log(req.url);
   
-  const query = req.query.q as string;
+  const value = req.query.q;
+  const query = Array.isArray(value) ? value[0] ?? "" : value ?? "";
   const response = QueryProcessor(query);
 
   res.status(200).send(response);

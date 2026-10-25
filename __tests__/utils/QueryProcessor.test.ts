@@ -3,6 +3,26 @@ import '@testing-library/jest-dom'
 
 describe("QueryProcessor", () => {
     test.each([
+        ["Which of the following is an anagram of listen: inlets, banana, enlists, google?", "inlets"],
+        ["Which of the following is an anagram of apple: papel, pale, pepla, applee?", "papel, pepla"],
+        ["abc123: WHICH OF THE FOLLOWING IS AN ANAGRAM OF LISTEN: INLETS, BANANA, ENLISTS, GOOGLE?", "INLETS"],
+        ["Which of the following is an anagram of listen: banana, enlists, google?", ""],
+        ["What is the scrabble score of zoo?", "12"],
+    ])('answers anagram and Scrabble regression "%s"', (query, expected) => {
+        expect(QueryProcessor(query)).toBe(expected);
+    });
+
+    test.each([
+        ["What is the scrabble score of banana?", "8"],
+        ["What is the scrabble score of quiz?", "22"],
+        ["What is the scrabble score of jazz?", "29"],
+        ['What is the scrabble score of "Hello"?', "8"],
+        ["a1b2c3: WHAT IS THE SCRABBLE SCORE OF QUIZ?", "22"],
+    ])('scores Scrabble word in "%s"', (query, expected) => {
+        expect(QueryProcessor(query)).toBe(expected);
+    });
+
+    test.each([
         ["What is 2 to the power of 60?", "1152921504606846976"],
         ["What is 2 to the power of 100?", "1267650600228229401496703205376"],
         ["What is 10 to the power of 22?", "10000000000000000000000"],

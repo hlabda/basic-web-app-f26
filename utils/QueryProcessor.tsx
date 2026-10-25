@@ -114,6 +114,23 @@ function calculate(expression: string): Numeric | undefined {
 }
 
 export default function QueryProcessor(query: string): string {
+  const anagram = query.match(/which of the following is an anagram of\s+["']?([a-z]+)["']?\s*:\s*([a-z'",\s]+?)\s*\??\s*$/i);
+  if (anagram) {
+    const signature = (word: string) => word.toLowerCase().split("").sort().join("");
+    const target = signature(anagram[1]);
+    const candidates = anagram[2].split(",").map(word => word.trim().replace(/^["']|["']$/g, ""));
+    return candidates.filter(word => signature(word) === target).join(", ");
+  }
+
+  const scrabble = query.match(/what is the scrabble score of\s+["']?([a-z]+)["']?\s*\??\s*$/i);
+  if (scrabble) {
+    const values: Record<string, number> = {};
+    ["aeilnorstu", "dg", "bcmp", "fhvwy", "k", "", "", "jx", "", "qz"].forEach((letters, index) => {
+      for (const letter of letters) values[letter] = index + 1;
+    });
+    return String(scrabble[1].toLowerCase().split("").reduce((score, letter) => score + values[letter], 0));
+  }
+
   const list = query.match(/which of the following numbers (?:is|are) (.+?):\s*(-?\d+(?:\s*,\s*-?\d+)*)\s*\??\s*$/i);
   if (list) {
     const numbers = list[2].split(",").map(Number);
