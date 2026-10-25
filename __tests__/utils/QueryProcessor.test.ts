@@ -3,6 +3,14 @@ import '@testing-library/jest-dom'
 
 describe("QueryProcessor", () => {
     test.each([
+        ["Which of the following numbers is the largest: 43, 78, 90?", "90"],
+        ["Which of the following numbers is the largest: 48, 99, 81?", "99"],
+        ["id: Which of the following numbers is the largest: -5, -2, -9?", "-2"],
+    ])('finds largest number in "%s"', (query, expected) => {
+        expect(QueryProcessor(query)).toBe(expected);
+    });
+
+    test.each([
         ["What is 83 plus 57?", "140"],
         ["What is 50 plus 17?", "67"],
         ["a1b2c3: What is 0 plus 9?", "9"],

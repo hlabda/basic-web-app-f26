@@ -1,4 +1,9 @@
 export default function QueryProcessor(query: string): string {
+  const largest = query.match(/which of the following numbers is the largest:\s*(-?\d+(?:\s*,\s*-?\d+)*)\s*\?/i);
+  if (largest) {
+    return String(Math.max(...largest[1].split(",").map(Number)));
+  }
+
   const addition = query.match(/what is (-?\d+) plus (-?\d+)\?/i);
   if (addition) {
     return String(Number(addition[1]) + Number(addition[2]));
