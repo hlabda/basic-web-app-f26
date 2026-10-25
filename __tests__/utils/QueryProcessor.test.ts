@@ -2,6 +2,15 @@ import QueryProcessor from "../../utils/QueryProcessor";
 import '@testing-library/jest-dom'
 
 describe("QueryProcessor", () => {
+    test.each([
+        ["What is 83 plus 57?", "140"],
+        ["What is 50 plus 17?", "67"],
+        ["a1b2c3: What is 0 plus 9?", "9"],
+        ["WHAT IS -5 PLUS 3?", "-2"],
+    ])('adds numbers in "%s"', (query, expected) => {
+        expect(QueryProcessor(query)).toBe(expected);
+    });
+
     test("should return a string", () => {
         const query = "test";
         const response: string = QueryProcessor(query);

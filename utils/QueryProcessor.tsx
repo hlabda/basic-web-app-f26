@@ -1,4 +1,9 @@
 export default function QueryProcessor(query: string): string {
+  const addition = query.match(/what is (-?\d+) plus (-?\d+)\?/i);
+  if (addition) {
+    return String(Number(addition[1]) + Number(addition[2]));
+  }
+
   if (query.toLowerCase().includes("what is your andrew id")) {
     return "hlabda";
   }
